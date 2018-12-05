@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{190D052C-C1D1-4093-8C70-ABC72DEC5B7E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MsgPack.Runtime</RootNamespace>
+    <AssemblyName>MsgPack.Runtime</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <LangVersion>4</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <LangVersion>4</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Attributes.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Extension.cs" />
+    <Compile Include="Formatters\IgnoreFormatter.cs" />
+    <Compile Include="Formatters\NullableFormatter.cs" />
+    <Compile Include="Formatters\PrimitiveFormatter.cs" />
+    <Compile Include="Formatters\ObjectFormatter.cs" />
+    <Compile Include="Formatters\ArrayFormatter.cs" />
+    <Compile Include="Formatters\DateTimeFormatter.cs" />
+    <Compile Include="Formatters\DictionaryFormatter.cs" />
+    <Compile Include="Formatters\EnumStringFormatter.cs" />
+    <Compile Include="IContext.cs" />
+    <Compile Include="FormatCode.cs" />
+    <Compile Include="StreamReader.cs" />
+    <Compile Include="Json.cs" />
+    <Compile Include="StreamWriter.cs" />
+    <Compile Include="Serializer.cs" />
+    <Compile Include="Formatters\ListFormatter.cs" />
+    <Compile Include="MsgPackStream.cs" />
+    <Compile Include="BufferSegment.cs" />
+    <Compile Include="Formatters\CustomArrayFormatter.cs" />
+    <Compile Include="Formatters\CustomMapFormatter.cs" />
+    <Compile Include="IFormatter.cs" />
+    <Compile Include="Formatters\BuiltInFormatters.cs" />
+    <Compile Include="KeyIndexMap.cs" />
+    <Compile Include="TinyJsonReader.cs" />
+    <Compile Include="IAfterDeserializeListener.cs" />
+    <Compile Include="IBeforeSerializeListener.cs" />
+    <Compile Include="Formatters\DecimalFormatter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Detail\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

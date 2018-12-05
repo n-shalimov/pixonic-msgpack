@@ -1,0 +1,30 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+package <#= _package #>;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+<#  if (_definition.Base != null) { #>
+public class <#= _definition.Name #> extends <#= ConvertType(_definition.Base.Symbol) #> {
+<#  } else { #>
+public class <#= _definition.Name #> extends Message {
+<#  } #>
+
+<#  foreach (var member in _definition.Members) { #>
+    private <#= ConvertType(member.Type) #> <#= member.Key #>;
+<#  } #>
+
+<#  foreach (var member in _definition.Members) {
+        var verb = member.TypeName == "bool" ? "is" : "get";
+        var type = ConvertType(member.Type); #>
+    public <#= type #> <#= verb #><#= Capitalize(member.Key) #>() {
+        return <#= member.Key #>;
+    }
+
+    public void set<#= Capitalize(member.Key) #>(<#= type #> <#= member.Key #>) {
+        this.<#= member.Key #> = <#= member.Key #>;
+    }
+
+<#  } #>
+}

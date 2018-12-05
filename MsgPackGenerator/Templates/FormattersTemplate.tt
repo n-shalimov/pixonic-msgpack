@@ -1,0 +1,151 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+
+namespace <#= Namespace #>
+{
+    public static class <#= ClassName #>
+    {
+        public static void Register(global::Pixonic.MsgPack.Serializer serializer)
+        {
+<#  foreach (var formatter in Formatters) { #>
+            serializer.RegisterFormatter(new <#= formatter #>());
+<#  } #>
+
+<#  foreach (var definition in EnumDefinitions) {
+        if (definition.IsStringEnum) { #>
+            serializer.RegisterFormatter(new global::Pixonic.MsgPack.EnumStringFormatter<<#= GetFullTypeName(definition.Type) #>>());
+<#      } else { #>
+            serializer.RegisterFormatter(new <#= GetFormatterName(definition.Type) #>());
+<#      }
+    } #>
+
+<#  foreach (var definition in ObjectDefinitions) { #>
+            serializer.RegisterFormatter(new <#= GetFormatterName(definition.Type) #>());
+<#  } #>
+        }
+<#  foreach (var definition in EnumDefinitions) {
+        if (definition.IsStringEnum) { continue; }
+        var fullTypeName = GetFullTypeName(definition.Type);
+        var underlyingTypeName = GetFullTypeName(definition.UnderlyingType); #>
+        
+        private sealed class <#= GetFormatterName(definition.Type) #>
+            : global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>
+        {
+            void global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>.Write(
+                <#= fullTypeName #> value,
+                global::Pixonic.MsgPack.MsgPackStream stream,
+                global::Pixonic.MsgPack.IContext context)
+            {
+                context.ResolveFormatter<<#= underlyingTypeName #>>().Write((<#= underlyingTypeName #>)value, stream, context);
+            }
+            
+            <#= fullTypeName #> global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>.Read(
+                global::Pixonic.MsgPack.MsgPackStream stream,
+                global::Pixonic.MsgPack.IContext context)
+            {
+                return (<#= fullTypeName #>)context.ResolveFormatter<<#= underlyingTypeName #>>().Read(stream, context);
+            }
+        }
+<#  } #>
+<#  foreach (var definition in ObjectDefinitions) {
+        var fullTypeName = GetFullTypeName(definition.Type);
+        var members = definition.AllMembers;
+        var membersCount = members.Length; #>
+
+        private sealed class <#= GetFormatterName(definition.Type) #>
+            : global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>
+        {
+            private static readonly global::Pixonic.MsgPack.KeyIndexMap KeyIndexMap = new global::Pixonic.MsgPack.KeyIndexMap(
+<#      for (var i = 0; i != membersCount; ++i) { #>
+                "<#= members[i].Key #>"<#= (i < membersCount - 1) ? "," : "" #>
+<#      } #>
+            );
+
+            void global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>.Write(
+                <#= fullTypeName #> value,
+                global::Pixonic.MsgPack.MsgPackStream stream,
+                global::Pixonic.MsgPack.IContext context)
+            {
+                if (value == null)
+                {
+                    global::Pixonic.MsgPack.StreamWriter.WriteNil(stream);
+                    return;
+                }
+                
+                var beforeSerializeListener = value as global::Pixonic.MsgPack.IBeforeSerializeListener;
+                if (beforeSerializeListener != null)
+                {
+                    beforeSerializeListener.OnBeforeSerialize();
+                }
+
+                context.Trace("<#= fullTypeName #> header>");
+                global::Pixonic.MsgPack.StreamWriter.WriteMapHeader(<#= membersCount #>, stream);
+<#      for (var i = 0; i != membersCount; ++i) {
+            var member = members[i]; #>
+
+                context.Trace("<#= fullTypeName #>::<#= member.Name #> key");
+                global::Pixonic.MsgPack.StreamWriter.WriteUtf8(KeyIndexMap[<#= i #>], stream);
+                context.Trace("<#= fullTypeName #>::<#= member.Name #> value");
+                context.ResolveFormatter<<#= member.TypeName #>>().Write(value.<#= member.Name #>, stream, context);
+<#      } #>
+            }
+
+            <#= fullTypeName #> global::Pixonic.MsgPack.IFormatter<<#= fullTypeName #>>.Read(
+                global::Pixonic.MsgPack.MsgPackStream stream,
+                global::Pixonic.MsgPack.IContext context)
+            {
+                if (global::Pixonic.MsgPack.StreamReader.TryReadNil(stream))
+                {
+                    return null;
+                }
+                
+<#      for (var i = 0; i != membersCount; ++i) { #>
+                var __value<#= i #>__ = default(<#= members[i].TypeName #>);
+<#      } #>
+
+                context.Trace("<#= fullTypeName #> header");
+                var length = global::Pixonic.MsgPack.StreamReader.ReadMapHeader(stream);
+                for (var i = 0; i < length; ++i)
+                {
+                    context.Trace("<#= fullTypeName #> next");
+                    var key = global::Pixonic.MsgPack.StreamReader.ReadUtf8(stream);
+                    int index;
+                    if (!KeyIndexMap.TryGetIndex(key, out index))
+                    {
+                        global::Pixonic.MsgPack.StreamReader.Skip(stream);
+                        continue;
+                    }
+
+                    switch (index)
+                    {
+<#      for (var i = 0; i != membersCount; ++i) {
+            var member = members[i]; #>
+                        case <#= i #>:
+                            context.Trace("<#= fullTypeName #>::<#= member.Name #>>");
+                            __value<#= i #>__ = context.ResolveFormatter<<#= member.TypeName #>>().Read(stream, context);
+                            break;
+
+<#      } #>
+                        default:
+                            global::Pixonic.MsgPack.StreamReader.Skip(stream);
+                            break;
+                    }
+                }
+
+                var __result__ = new <#= fullTypeName #>();
+<#      for (var i = 0; i != membersCount; ++i) { #>
+                __result__.<#= members[i].Name #> = __value<#= i #>__;
+<#      } #>
+
+                var afterDeserializeListener = __result__ as global::Pixonic.MsgPack.IAfterDeserializeListener;
+                if (afterDeserializeListener != null)
+                {
+                    afterDeserializeListener.OnAfterDeserialize();
+                }
+
+                return __result__;
+            }
+        }
+<#  } #>
+    }
+}
