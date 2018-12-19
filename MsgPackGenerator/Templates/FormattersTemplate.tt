@@ -13,7 +13,7 @@ namespace <#= Namespace #>
 
 <#  foreach (var definition in EnumDefinitions) {
         if (definition.IsStringEnum) { #>
-            serializer.RegisterFormatter(new global::Pixonic.MsgPack.EnumStringFormatter<<#= GetFullTypeName(definition.Type) #>>());
+            serializer.RegisterFormatter(new global::Pixonic.MsgPack.Formatters.EnumStringFormatter<<#= GetFullTypeName(definition.Type) #>>());
 <#      } else { #>
             serializer.RegisterFormatter(new <#= GetFormatterName(definition.Type) #>());
 <#      }
