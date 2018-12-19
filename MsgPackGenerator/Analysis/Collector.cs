@@ -20,6 +20,10 @@ namespace Analysis
         private readonly INamedTypeSymbol _formatterAttributeType;
         private readonly INamedTypeSymbol _stringEnumAttribute;
 
+        private readonly INamedTypeSymbol _legacyObjectAttributeType;
+        private readonly INamedTypeSymbol _legacyKeyAttributeType;
+        private readonly INamedTypeSymbol _legacyIgnoreAttributeType;
+
         private readonly HashSet<ITypeSymbol> _collected = new HashSet<ITypeSymbol>();
 
         private readonly List<ObjectDefinition> _collectedObjects = new List<ObjectDefinition>();
@@ -49,6 +53,10 @@ namespace Analysis
             _ignoreAttributeType = compilation.GetTypeByMetadataName("Pixonic.MsgPack.MsgPackIgnoreAttribute");
             _formatterAttributeType = compilation.GetTypeByMetadataName("Pixonic.MsgPack.MsgPackFormatterAttribute");
             _stringEnumAttribute = compilation.GetTypeByMetadataName("Pixonic.MsgPack.MsgPackStringEnumAttribute");
+
+            _legacyObjectAttributeType = compilation.GetTypeByMetadataName("MessagePack.MessagePackObjectAttribute");
+            _legacyKeyAttributeType = compilation.GetTypeByMetadataName("MessagePack.KeyAttribute");
+            _legacyIgnoreAttributeType = compilation.GetTypeByMetadataName("MessagePack.IgnoreMemberAttribute");
 
             var baseFormatter = compilation.GetTypeByMetadataName("Pixonic.MsgPack.IFormatter`1");
 
@@ -88,13 +96,13 @@ namespace Analysis
                 }
             }
 
-            foreach (var message in GetClasses(compilation, _objectAttributeType))
+            foreach (var message in GetClasses(compilation, _objectAttributeType, _legacyObjectAttributeType))
             {
                 Collect(message);
             }
         }
 
-        private IEnumerable<INamedTypeSymbol> GetClasses(Compilation compilation, INamedTypeSymbol attributeType) =>
+        private IEnumerable<INamedTypeSymbol> GetClasses(Compilation compilation, params INamedTypeSymbol[] attributeTypes) =>
             compilation.SyntaxTrees
                 .Select(st => compilation.GetSemanticModel(st))
                 .SelectMany(sm => sm.SyntaxTree
@@ -105,7 +113,7 @@ namespace Analysis
                     .OfType<INamedTypeSymbol>()
                     .Where(IsPublic)
                     .Where(s => s.TypeKind == TypeKind.Class && !s.IsAbstract)
-                    .Where(s => GetAttribute(s, attributeType) != null)
+                    .Where(s => GetAttribute(s, attributeTypes) != null)
                 );
 
         private bool Collect(ITypeSymbol symbol)
@@ -209,7 +217,7 @@ namespace Analysis
 
         private bool CollectObject(INamedTypeSymbol symbol)
         {
-            var objectAttribute = GetAttribute(symbol, _objectAttributeType);
+            var objectAttribute = GetAttribute(symbol, _objectAttributeType, _legacyObjectAttributeType);
             if (objectAttribute == null)
             {
                 throw new Exception($"Serialization Object must be marked by {_objectAttributeType.Name}. Type: {symbol}");
@@ -232,15 +240,15 @@ namespace Analysis
             {
                 if (field.IsStatic) { continue; }
                 if (field.IsReadOnly) { continue; }
-                if (GetAttribute(field, _ignoreAttributeType) != null) { continue; }
+                if (GetAttribute(field, _ignoreAttributeType, _legacyIgnoreAttributeType) != null) { continue; }
                 if (!Collect(field.Type)) { continue; }
 
-                var key = GetAttribute(field, _keyAttributeType)?.ConstructorArguments[0].Value.ToString() ?? ToSerializedName(field.Name);
+                var key = GetAttribute(field, _keyAttributeType, _legacyKeyAttributeType);
 
                 members.Add(new MemberDefinition
                 {
                     Name = field.Name,
-                    Key = key,
+                    Key = (key?.ConstructorArguments[0].Value.ToString()) ?? ToSerializedName(field.Name),
                     Type = field.Type
                 });
             }
@@ -270,8 +278,8 @@ namespace Analysis
         private static IEnumerable<ISymbol> GetPublicMembers(ITypeSymbol symbol) =>
             symbol.GetMembers().Where(IsPublic);
 
-        private static AttributeData GetAttribute(ISymbol symbol, INamedTypeSymbol attribute) =>
-            symbol.GetAttributes().FirstOrDefault(a => a.AttributeClass == attribute);
+        private static AttributeData GetAttribute(ISymbol symbol, params INamedTypeSymbol[] attributes) =>
+            symbol.GetAttributes().FirstOrDefault(a => attributes.Contains(a.AttributeClass));
 
         private static bool IsPublic(ISymbol symbol) =>
             symbol.DeclaredAccessibility == Accessibility.Public;

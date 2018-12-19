@@ -62,6 +62,7 @@
     <Compile Include="IAfterDeserializeListener.cs" />
     <Compile Include="IBeforeSerializeListener.cs" />
     <Compile Include="Formatters\DecimalFormatter.cs" />
+    <Compile Include="MigrationAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Detail\" />
