@@ -59,7 +59,7 @@ namespace Pixonic.MsgPack
 
         public void RegisterFormatter<T>(IFormatter<T> formatter)
         {
-            _formatters.Add(typeof(T), formatter);
+            _formatters[typeof(T)] = formatter;
         }
 
         IFormatter<T> IContext.ResolveFormatter<T>()
@@ -72,7 +72,7 @@ namespace Pixonic.MsgPack
             IFormatter formatter;
             if (_formatters.TryGetValue(type, out formatter))
             {
-                return _formatters[type];
+                return formatter;
             }
 
             throw new MsgPackException("Unable to resolve formatter for type {0}", type);

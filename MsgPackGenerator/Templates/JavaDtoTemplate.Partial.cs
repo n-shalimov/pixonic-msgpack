@@ -141,7 +141,6 @@ namespace Templates
                 return $"{GetPackageName(typeSymbol)}.{typeSymbol.Name}";
             }
 
-
             System.Console.WriteLine($"Unmapped type {typeSymbol}");
 
             return type;
