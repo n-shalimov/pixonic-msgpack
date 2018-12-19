@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Analysis;
 using Microsoft.CodeAnalysis;
 
@@ -56,7 +57,7 @@ namespace Templates
         }
 
         private IEnumerable<ObjectDefinition> ObjectDefinitions
-            => _collector.ObjectDefinitions;
+            => _collector.ObjectDefinitions.Where(d => !d.Type.IsAbstract);
 
         private IEnumerable<EnumDefinition> EnumDefinitions
             => _collector.EnumDefinitions;
