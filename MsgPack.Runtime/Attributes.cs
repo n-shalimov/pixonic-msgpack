@@ -5,7 +5,7 @@ namespace Pixonic.MsgPack
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class MsgPackObjectAttribute : Attribute {}
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class MsgPackKeyAttribute : Attribute
     {
         public string Key { get; private set; }
@@ -16,7 +16,7 @@ namespace Pixonic.MsgPack
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class MsgPackIgnoreAttribute : Attribute {}
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]

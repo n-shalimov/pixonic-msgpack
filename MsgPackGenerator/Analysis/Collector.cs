@@ -230,7 +230,6 @@ namespace Analysis
             var members = new List<MemberDefinition>();
             foreach (var field in GetPublicMembers(symbol).OfType<IFieldSymbol>())
             {
-                if (field.IsStatic) { continue; }
                 if (field.IsReadOnly) { continue; }
                 if (GetAttribute(field, _ignoreAttributeType) != null) { continue; }
                 if (!Collect(field.Type)) { continue; }
@@ -242,6 +241,22 @@ namespace Analysis
                     Name = field.Name,
                     Key = key,
                     Type = field.Type
+                });
+            }
+
+            foreach (var property in GetPublicMembers(symbol).OfType<IPropertySymbol>())
+            {
+                if (GetAttribute(property, _ignoreAttributeType, _legacyIgnoreAttributeType) != null) { continue; }
+                if (!IsPublic(property.GetMethod)) { continue; }
+                if (!IsPublic(property.SetMethod)) { continue; }
+                if (!Collect(property.Type)) { continue; }
+
+                var key = GetAttribute(property, _keyAttributeType, _legacyKeyAttributeType);
+                members.Add(new MemberDefinition
+                {
+                    Name = property.Name,
+                    Key = (key?.ConstructorArguments[0].Value.ToString()) ?? ToSerializedName(property.Name),
+                    Type = property.Type
                 });
             }
 
@@ -268,7 +283,7 @@ namespace Analysis
         }
 
         private static IEnumerable<ISymbol> GetPublicMembers(ITypeSymbol symbol) =>
-            symbol.GetMembers().Where(IsPublic);
+            symbol.GetMembers().Where(s => IsPublic(s) && !s.IsStatic);
 
         private static AttributeData GetAttribute(ISymbol symbol, INamedTypeSymbol attribute) =>
             symbol.GetAttributes().FirstOrDefault(a => a.AttributeClass == attribute);
