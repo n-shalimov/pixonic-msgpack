@@ -246,12 +246,12 @@ namespace Analysis
 
             foreach (var property in GetPublicMembers(symbol).OfType<IPropertySymbol>())
             {
-                if (GetAttribute(property, _ignoreAttributeType, _legacyIgnoreAttributeType) != null) { continue; }
+                if (GetAttribute(property, _ignoreAttributeType) != null) { continue; }
                 if (!IsPublic(property.GetMethod)) { continue; }
                 if (!IsPublic(property.SetMethod)) { continue; }
                 if (!Collect(property.Type)) { continue; }
 
-                var key = GetAttribute(property, _keyAttributeType, _legacyKeyAttributeType);
+                var key = GetAttribute(property, _keyAttributeType);
                 members.Add(new MemberDefinition
                 {
                     Name = property.Name,

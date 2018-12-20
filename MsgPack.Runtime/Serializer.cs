@@ -62,6 +62,16 @@ namespace Pixonic.MsgPack
             _formatters[typeof(T)] = formatter;
         }
 
+        public bool HasFormatter(System.Type type)
+        {
+            return _formatters.ContainsKey(type);
+        }
+
+        public bool HasFormatter<T>()
+        {
+            return HasFormatter(typeof(T));
+        }
+
         IFormatter<T> IContext.ResolveFormatter<T>()
         {
             return GetFormatter<T>();
