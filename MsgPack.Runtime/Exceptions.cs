@@ -20,7 +20,7 @@ namespace Pixonic.MsgPack
     public sealed class MsgPackCodeException : MsgPackException
     {
         public MsgPackCodeException(byte code)
-            : base("Code is invalid. Format mame: {0}", CodeToString(code))
+            : base("Code is invalid. Format name: {0}", CodeToString(code))
         {}
 
         private static string CodeToString(byte code)
