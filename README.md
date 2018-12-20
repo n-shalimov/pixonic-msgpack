@@ -66,8 +66,7 @@ public enum StringEnum
 ```
 
 #### Limitations
-- Only non-abstract classes are supported (but you could use Extensions for workaround for now);
-- Only public fields could be exposed;
+- Only public fields and properties could be exposed;
 - Runtime library targeted to .NET 2.0 framework (for Unity3D compatibility).
 
 #### Code generator
