@@ -32,7 +32,7 @@ namespace Pixonic.MsgPack.Runtime.Formatters
         {
             if (StreamReader.TryReadNil(stream))
             {
-                return default(TMap);
+                return GetNil();
             }
 
             var keyFormatter = context.ResolveFormatter<TKey>();
@@ -48,6 +48,11 @@ namespace Pixonic.MsgPack.Runtime.Formatters
             }
 
             return map;
+        }
+
+        protected virtual TMap GetNil()
+        {
+            return default(TMap);
         }
 
         protected abstract TMap Create(uint length);
