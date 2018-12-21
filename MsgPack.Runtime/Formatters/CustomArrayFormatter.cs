@@ -23,7 +23,7 @@
         {
             if (StreamReader.TryReadNil(stream))
             {
-                return default(TArray);
+                return GetNil();
             }
 
             var formatter = context.ResolveFormatter<TItem>();
@@ -35,6 +35,11 @@
             }
 
             return array;
+        }
+
+        protected virtual TArray GetNil()
+        {
+            return default(TArray);
         }
 
         protected abstract TArray Create(long length);
