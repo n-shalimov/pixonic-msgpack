@@ -228,6 +228,7 @@ namespace Pixonic.MsgPack
 
                 default:
                     builder.Append("null");
+                    StreamReader.Skip(stream);
                     break;
             }
         }
