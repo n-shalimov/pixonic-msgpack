@@ -86,9 +86,10 @@
         public const byte MinNegativeFixInt = 0xe0; // 224
         public const byte MaxNegativeFixInt = 0xff; // 255
 
-        public static bool IsSignedInteger(byte code)
+        public static bool IsSignedInteger(byte intCode)
         {
-            return (code & 0xf0) == 0xd0;
+            return (intCode & 0xf0) == 0xd0
+                || (intCode & 0xe0) == FormatMask.NegativeFixInt;
         }
     }
 
