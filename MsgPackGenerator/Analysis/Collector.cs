@@ -92,6 +92,7 @@ namespace Analysis
                     else
                     {
                         _formatters[namedTargetType] = formatter;
+						_collected.Add(namedTargetType);
                     }
                 }
             }

@@ -121,7 +121,7 @@ namespace <#= Namespace #>
 <#      for (var i = 0; i != membersCount; ++i) {
             var member = members[i]; #>
                         case <#= i #>:
-                            context.Trace("<#= fullTypeName #>::<#= member.Name #>>");
+                            context.Trace("<#= fullTypeName #>::<#= member.Name #>");
                             __value<#= i #>__ = context.ResolveFormatter<<#= member.TypeName #>>().Read(stream, context);
                             break;
 
