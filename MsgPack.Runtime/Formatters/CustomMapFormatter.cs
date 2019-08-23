@@ -7,7 +7,7 @@ namespace Pixonic.MsgPack.Runtime.Formatters
     {
         void IFormatter<TMap>.Write(TMap value, MsgPackStream stream, IContext context)
         {
-            if (!typeof(TMap).IsValueType && value.Equals(default(TMap)))
+            if (!typeof(TMap).IsValueType && object.Equals(value, default(TMap)))
             {
                 StreamWriter.WriteNil(stream);
                 return;
