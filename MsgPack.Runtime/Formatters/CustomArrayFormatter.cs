@@ -4,7 +4,7 @@
     {
         void IFormatter<TArray>.Write(TArray value, MsgPackStream stream, IContext context)
         {
-            if (!typeof(TArray).IsValueType && value.Equals(default(TArray)))
+            if (!typeof(TArray).IsValueType && object.Equals(value, default(TArray)))
             {
                 StreamWriter.WriteNil(stream);
                 return;
