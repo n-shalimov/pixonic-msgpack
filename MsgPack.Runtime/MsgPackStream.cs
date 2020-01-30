@@ -251,11 +251,10 @@ namespace Pixonic.MsgPack
         public void WriteString(string value)
         {
             var length = value.Length;
-            var maxChunkSize = Utf8.GetMaxCharCount(ChunkSize);
 
             for (var offset = 0; length > 0;)
             {
-                var chunkSize = length > maxChunkSize ? maxChunkSize : length;
+                var chunkSize = length > ChunkSize ? ChunkSize : length;
                 var bytesCount = Utf8.GetBytes(value, offset, chunkSize, _tempBuffer, 0);
 
                 Flush(_tempBuffer, 0, bytesCount);
